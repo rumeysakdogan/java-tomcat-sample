@@ -1,0 +1,35 @@
+pipeline {
+    agent any
+    stages {
+        stage(‘Build Application’) {
+            steps {
+                sh ‘mvn -f pom.xml clean package’
+            }
+            post {
+                success {
+                    echo “Now Archiving the Artifacts.....”
+                    archiveArtifacts artifacts: ‘**/*.war’
+                }
+            }
+        }
+        stage(‘Deploy to Staging Environment’){
+            steps {
+                    echo “Copying the Artifacts.....”
+                    copyArtifacts filter: ‘**/*.war’, fingerprintArtifacts: true, projectName: ‘build-web-application-code-pipeline’
+                    echo “Deploy to stage”
+                    deploy adapters: [tomcat9(credentialsId: ‘tomcat_server’, path: ‘’, url: ‘http://172.31.91.119:8080’)], contextPath: ‘/’, war: ‘**/*.war’
+                }
+        }
+        stage(‘Deploy to Production Environment’){
+            steps{
+                timeout(time:5, unit:‘DAYS’){
+                    input message:‘Approve PRODUCTION Deployment?’
+                }
+                    echo “Copying the Artifacts.....”
+                    copyArtifacts filter: ‘**/*.war’, fingerprintArtifacts: true, projectName: ‘build-web-application-code-pipeline’
+                    echo “Deploy to stage”
+                    deploy adapters: [tomcat9(credentialsId: ‘tomcat_server’, path: ‘’, url: ‘http://172.31.84.97:8080’)], contextPath: ‘/’, war: ‘**/*.war’
+            }
+        }
+    }
+}

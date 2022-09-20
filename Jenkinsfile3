@@ -17,7 +17,7 @@ pipeline {
                     echo “Copying the Artifacts.....”
                     copyArtifacts filter: ‘**/*.war’, fingerprintArtifacts: true, projectName: ‘build-web-application-code-pipeline’
                     echo “Deploy to stage”
-                    deploy adapters: [tomcat9(credentialsId: ‘tomcat_server’, path: ‘’, url: ‘http://172.31.91.119:8080’)], contextPath: ‘/’, war: ‘**/*.war’
+                    deploy adapters: [tomcat9(credentialsId: ‘tomcat_server’, path: ‘’, url: ‘http://172.31.18.119:8080’)], contextPath: ‘/’, war: ‘**/*.war’
                 }
         }
         stage(‘Deploy to Production Environment’){
